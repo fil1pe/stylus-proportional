@@ -11,33 +11,62 @@ module.exports = function (data) {
 
     function dfs(node) {
       const lineno = node.lineno - 1
-      if (node.constructor.name === 'Property') props[lineno] = true
-      children[lineno] = children[lineno] || []
-      if (node.block)
-        for (const nextNode of node.block.nodes || []) {
-          children[lineno].push(nextNode.lineno - 1)
-          dfs(nextNode)
+      const type = node.constructor.name
+      if (type === 'Group') for (const child of node.nodes) dfs(child)
+      else if (type === 'Property') props[lineno] = true
+      else if (node.block?.nodes.length) {
+        children[lineno] = children[lineno] || []
+        const addChild = (node) => {
+          children[lineno].push(node.lineno - 1)
+          dfs(node)
         }
-      if (node.nodes)
-        for (const nextNode of node.nodes) {
-          children[lineno].push(nextNode.lineno - 1)
-          dfs(nextNode)
+        for (const child of node.block.nodes) {
+          if (child.constructor.name === 'Group')
+            (child.nodes || []).forEach((node) => addChild(node))
+          else addChild(child)
         }
+      }
     }
 
     for (const node of nodes) dfs(node)
   }
 
-  analyze(parts.filter((_, i) => i % 2 === 0).join('\n'))
+  const dataToAnalyze = parts.filter((_, i) => i % 2 === 0).join('\n')
+  analyze(dataToAnalyze)
+
+  const lines = dataToAnalyze.split('\n')
+  const braces = []
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].match(/{/)) {
+      if (!children[i])
+        for (let j = i; j >= 0; j--)
+          if (children[j]) {
+            children[i] = children[j]
+            break
+          }
+
+      let count = 0
+      for (let j = i; j < lines.length; j++) {
+        if (lines[j].match(/{/) && j !== i) count++
+        else if (lines[j].match(/}/) && !count--) {
+          children[j] = children[i]
+          braces.push(j)
+          break
+        }
+      }
+    }
+  }
 
   // Skip the last splitted part, which is not responsive
   for (let i = 1; i < parts.length - 1; i += 2) {
     let args = parts[i].match(/proportional\((.*?),(.*?)\)/)
     if (args && args[1] && args[2]) {
       args = [args[1].trim(), parseFloat(args[2].trim())]
+
       let lines = []
       for (let j = 0; j < i; j += 2)
         lines = lines.concat(parts[j].split(/\r?\n/))
+
       for (let j = lines.length - 1; j >= 0; j--) {
         let line = lines[j]
         if (props[j]) {
@@ -54,6 +83,11 @@ module.exports = function (data) {
           else lines[j] = null
         }
       }
+
+      for (const j of braces)
+        if ((children[j] || []).filter((k) => lines[k]).length === 0)
+          lines[j] = null
+
       lines = lines.filter((i) => i)
       if (lines.length)
         lines = [
@@ -61,6 +95,7 @@ module.exports = function (data) {
             (args[0].match(/^\(.*\)$/) ? args[0] : '(' + args[0] + ')'),
           ...lines,
         ]
+
       parts[i] = lines.join('\n')
     }
   }
