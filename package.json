@@ -5,5 +5,11 @@
   "devDependencies": {
     "gulp": "^4.0.2",
     "gulp-stylus": "^3.0.0"
+  },
+  "dependencies": {
+    "path": "^0.12.7",
+    "plugin-error": "^2.0.1",
+    "stylus": "^0.59.0",
+    "through2": "^4.0.2"
   }
 }
