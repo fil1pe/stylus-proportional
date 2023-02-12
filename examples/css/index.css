@@ -1,0 +1,29 @@
+body {
+  color: #f00;
+  padding: 100.5px;
+  margin: 10px 0.5px;
+}
+@media (min-width: 1000px) {
+  body {
+    display: block;
+  }
+}
+@media (max-width: 1500px) {
+  body {
+    padding: 75px;
+    margin: 8px 1px;
+  }
+}
+html {
+  padding: 20px;
+  cursor: default;
+}
+@media (max-width: 1300px) {
+  body {
+    padding: 50px;
+    margin: 5px 1px;
+  }
+  html {
+    padding: 10px;
+  }
+}
