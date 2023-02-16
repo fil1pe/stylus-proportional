@@ -1,4 +1,17 @@
 {
+  "name": "stylus-proportional",
+  "version": "1.0.0",
+  "description": "A Stylus preprocessor to make layouts responsively proportional",
+  "keywords": [
+    "stylus",
+    "responsive",
+    "proportional"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fil1pe/stylus-proportional.git"
+  },
+  "main": "index.js",
   "scripts": {
     "gulp": "gulp",
     "start": "webpack serve"

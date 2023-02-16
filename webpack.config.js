@@ -36,7 +36,7 @@ module.exports = {
           'style-loader',
           'css-loader',
           'stylus-loader',
-          path.resolve(__dirname, './src/loader.js'),
+          path.resolve(__dirname, './index.js'),
         ],
       },
       {
