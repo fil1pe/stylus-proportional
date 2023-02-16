@@ -18,6 +18,17 @@ $ yarn add stylus-proportional
 
 ## Configuration
 
+### Gatsby plugin (gatsby-config.js)
+
+```js
+module.exports = {
+  plugins: [
+    'gatsby-plugin-stylus',
+    'stylus-proportional',
+  ],
+}
+```
+
 ### Webpack (webpack.config.js)
 
 ```js
