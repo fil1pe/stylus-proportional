@@ -70,11 +70,12 @@ module.exports = function (data) {
       for (let j = lines.length - 1; j >= 0; j--) {
         let line = lines[j]
         if (props[j]) {
-          line = line.replace(/ ((\d+(\.\d+)?)|(\.\d+))px/g, (val) => {
-            val = val.trim().replace('px', '')
-            const newValue = Math.round(val * args[1])
-            return ' ' + (newValue || Math.ceil(val * args[1])) + 'px'
-          })
+          if (!line.match(/( |\/)(@proportional-skip)( |\r?\n|$)/))
+            line = line.replace(/ ((\d+(\.\d+)?)|(\.\d+))px/g, (val) => {
+              val = val.trim().replace('px', '')
+              const newValue = Math.round(val * args[1])
+              return ' ' + (newValue || Math.ceil(val * args[1])) + 'px'
+            })
           if (line === lines[j]) lines[j] = null
           else lines[j] = '\t' + line
         } else {
