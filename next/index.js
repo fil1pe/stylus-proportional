@@ -22,7 +22,7 @@ module.exports = (config) => ({
           ? rule.use.indexOf('stylus-loader')
           : -1
         if (stylusLoaderIndex !== -1)
-          rule.use.splice(stylusLoaderIndex + 1, 0, 'stylus-proportional')
+          rule.use.push(require.resolve('stylus-proportional'))
       }
     }
     return config

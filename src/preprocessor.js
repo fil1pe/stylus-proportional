@@ -7,7 +7,7 @@ module.exports = function (data) {
   const props = {} // All lines having properties
   const children = {} // Children (nodes) of the blocks
   function analyze(block) {
-    const nodes = new Parser(block).parse().nodes || []
+    const nodes = new Parser(block, { cache: false }).parse().nodes || []
 
     function dfs(node) {
       const lineno = node.lineno - 1
@@ -59,7 +59,7 @@ module.exports = function (data) {
 
   // Skip the last splitted part, which is not responsive
   for (let i = 1; i < parts.length - 1; i += 2) {
-    let args = parts[i].match(/proportional\((.*?),(.*?)\)/)
+    let args = parts[i].match(/^proportional\((.*?),(.*?)\)/)
     if (args && args[1] && args[2]) {
       args = [args[1].trim(), parseFloat(args[2].trim())]
 
@@ -70,12 +70,20 @@ module.exports = function (data) {
       for (let j = lines.length - 1; j >= 0; j--) {
         let line = lines[j]
         if (props[j]) {
-          if (!line.match(/( |\/)(@proportional-skip)( |\r?\n|$)/))
-            line = line.replace(/ ((\d+(\.\d+)?)|(\.\d+))px/g, (val) => {
-              val = val.trim().replace('px', '')
-              const newValue = Math.round(val * args[1])
-              return ' ' + (newValue || Math.ceil(val * args[1])) + 'px'
-            })
+          if (!line.match(/(((?![A-Za-z0-9-_]).)|^)(@proportional-skip)(?=(((?![A-Za-z0-9-_]).)|$))/))
+            line = line.replace(
+              /(((?![A-Za-z0-9-_\.]).)|^)-?((\d+(\.\d+)?)|(\.\d+))px(?=(((?![A-Za-z0-9-_\.]).)|$))/g,
+              (val) => {
+                const num = parseFloat(
+                  val.replace(/^((?![A-Za-z0-9-_\.]).)?/, '').replace(/px.*$/, '')
+                )
+                const newValue = num * args[1]
+                return val.replace(
+                  /-?((\d+(\.\d+)?)|(\.\d+))/,
+                  Math.round(newValue) || Math.ceil(newValue)
+                )
+              }
+            )
           if (line === lines[j]) lines[j] = null
           else lines[j] = '\t' + line
         } else {
