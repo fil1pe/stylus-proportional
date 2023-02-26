@@ -14,7 +14,7 @@ module.exports = function () {
       return cb(null, file)
 
     file.contents = Buffer.from(
-      preprocessor(file.contents.toString(enc || 'utf-8'))
+      preprocessor(file.contents.toString(enc || 'utf-8'), file.path)
     )
 
     return cb(null, file)

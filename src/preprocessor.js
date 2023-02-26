@@ -1,6 +1,37 @@
 const Parser = require('stylus').Parser
+const path = require('path')
+const fs = require('fs')
 
-module.exports = function (data) {
+module.exports = function (data, filename) {
+  ;(function resolveImports() {
+    const parts = data
+      .split(/(@import +"(.*?)" *;?)|(@import +'(.*?)' *;?)/)
+      .filter((part) => part || part === '')
+    let i = 2
+    while (parts[i]) {
+      !path.extname(parts[i]) && (parts[i] += '.styl')
+      const indent = parts[i - 2].split('\n').pop()
+      try {
+        let data = fs.readFileSync(
+          path.resolve(path.dirname(filename), parts[i]),
+          'utf8'
+        )
+        indent &&
+          (data = data
+            .split('\n')
+            .map((line, index) => (index ? indent : '') + line)
+            .join('\n'))
+        parts[i - 2] += data
+      } catch (err) {
+        parts[i - 2] += parts[i - 1]
+      }
+      delete parts[i]
+      delete parts[i - 1]
+      i += 3
+    }
+    data = parts.join('')
+  })()
+
   const parts = data.split(/^(proportional\(.*?,.*?\))/m)
   if (parts.length === 1) return data
 
@@ -70,12 +101,18 @@ module.exports = function (data) {
       for (let j = lines.length - 1; j >= 0; j--) {
         let line = lines[j]
         if (props[j]) {
-          if (!line.match(/(((?![A-Za-z0-9-_]).)|^)(@proportional-skip)(?=(((?![A-Za-z0-9-_]).)|$))/))
+          if (
+            !line.match(
+              /(((?![A-Za-z0-9-_]).)|^)(@proportional-skip)(?=(((?![A-Za-z0-9-_]).)|$))/
+            )
+          )
             line = line.replace(
               /(((?![A-Za-z0-9-_\.]).)|^)-?((\d+(\.\d+)?)|(\.\d+))px(?=(((?![A-Za-z0-9-_\.]).)|$))/g,
               (val) => {
                 const num = parseFloat(
-                  val.replace(/^((?![A-Za-z0-9-_\.]).)?/, '').replace(/px.*$/, '')
+                  val
+                    .replace(/^((?![A-Za-z0-9-_\.]).)?/, '')
+                    .replace(/px.*$/, '')
                 )
                 const newValue = num * args[1]
                 return val.replace(
@@ -97,7 +134,7 @@ module.exports = function (data) {
         if ((children[j] || []).filter((k) => lines[k]).length === 0)
           lines[j] = null
 
-      lines = lines.filter((i) => i)
+      lines = lines.filter(Boolean)
       if (lines.length)
         lines = [
           '@media ' +

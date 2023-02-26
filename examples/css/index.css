@@ -8,10 +8,16 @@ body {
     display: block;
   }
 }
+body button {
+  padding: 5px;
+}
 @media (max-width: 1500px) {
   body {
     padding: 75px;
     margin: 8px 1px;
+  }
+  body button {
+    padding: 4px;
   }
 }
 html {
@@ -22,6 +28,9 @@ html {
   body {
     padding: 50px;
     margin: 5px 1px;
+  }
+  body button {
+    padding: 3px;
   }
   html {
     padding: 10px;
