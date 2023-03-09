@@ -25,8 +25,8 @@ const withPlugins = require('next-with-plugins')
 
 module.exports = withPlugins({
   plugins: [
-    'stylus-proportional/next',
     'next-stylus',
+    'stylus-proportional/next',
   ],
 })
 ```

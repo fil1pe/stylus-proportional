@@ -7,10 +7,12 @@ function testRule({ test }) {
   )
 }
 
-module.exports = (config) => ({
-  ...config,
+module.exports = (nextConfig) => ({
+  ...nextConfig,
 
   webpack: (config) => {
+    if (nextConfig.webpack) config = nextConfig.webpack(config)
+
     const stylusRules = config.module.rules.filter(
       ({ oneOf }) => oneOf && oneOf.some(testRule)
     )
