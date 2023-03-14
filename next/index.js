@@ -2,8 +2,10 @@ function testRule({ test }) {
   return (
     test &&
     (test.some
-      ? test.some((test) => 'test.module.styl'.match(test))
-      : 'test.module.styl'.match(test))
+      ? test.some(
+          (test) => 'test.module.styl'.match(test) || 'test.styl'.match(test)
+        )
+      : 'test.module.styl'.match(test) || 'test.styl'.match(test))
   )
 }
 
