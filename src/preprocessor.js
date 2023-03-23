@@ -98,14 +98,19 @@ module.exports = function (data, filename) {
       for (let j = 0; j < i; j += 2)
         lines = lines.concat(parts[j].split(/\r?\n/))
 
+      function clearBlock(parent) {
+        if (!lines[parent]) return
+        lines[parent] = null
+        for (const j of children[parent] || []) clearBlock(j)
+      }
+
       for (let j = lines.length - 1; j >= 0; j--) {
         let line = lines[j]
+        const skip = line.match(
+          /(((?![A-Za-z0-9-_]).)|^)(@proportional-skip)(?=(((?![A-Za-z0-9-_]).)|$))/
+        )
         if (props[j]) {
-          if (
-            !line.match(
-              /(((?![A-Za-z0-9-_]).)|^)(@proportional-skip)(?=(((?![A-Za-z0-9-_]).)|$))/
-            )
-          )
+          if (!skip)
             line = line.replace(
               /(((?![A-Za-z0-9-_\.]).)|^)-?((\d+(\.\d+)?)|(\.\d+))px(?=(((?![A-Za-z0-9-_\.]).)|$))/g,
               (val) => {
@@ -123,10 +128,12 @@ module.exports = function (data, filename) {
             )
           if (line === lines[j]) lines[j] = null
           else lines[j] = '\t' + line
-        } else {
+        } else if (!skip) {
           if ((children[j] || []).filter((k) => lines[k]).length)
             lines[j] = '\t' + line
           else lines[j] = null
+        } else {
+          clearBlock(j)
         }
       }
 
