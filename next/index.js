@@ -12,8 +12,8 @@ function testRule({ test }) {
 module.exports = (nextConfig) => ({
   ...nextConfig,
 
-  webpack: (config) => {
-    if (nextConfig.webpack) config = nextConfig.webpack(config)
+  webpack: (config, options = {}) => {
+    if (nextConfig.webpack) config = nextConfig.webpack(config, options)
 
     const stylusRules = config.module.rules.filter(
       ({ oneOf }) => oneOf && oneOf.some(testRule)
